@@ -46,8 +46,11 @@ def run_client(host: str, port: int):
     client.connect()
 
     while True:
-        event, payload = decode_data(input().encode("utf-8"))
-        client.send(event, payload)
+        try:
+            event, payload = decode_data(input().encode("utf-8"))
+            client.send(event, payload)
+        except ValueError:
+            print("invalid input")
 
 
 if __name__ == "__main__":
