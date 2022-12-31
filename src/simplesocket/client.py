@@ -16,12 +16,17 @@ class EventClient(EventHandler):
         self.port = port
 
     def connect(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self.host, self.port))
+        try:
+            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket.connect((self.host, self.port))
 
-        self.receive_thread = threading.Thread(target=self._receive)
-        self.receive_thread.daemon = True
-        self.receive_thread.start()
+            self.receive_thread = threading.Thread(target=self._receive)
+            self.receive_thread.daemon = True
+            self.receive_thread.start()
+            return True
+        except ConnectionRefusedError:
+            logger.error(f"Connection to {self.host}:{self.port} refused")
+            return False
 
     def _receive(self):
         for handler in self.connect_handlers:
