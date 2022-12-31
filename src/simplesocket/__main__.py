@@ -4,7 +4,6 @@ from sys import argv
 
 from client import EventClient as Client
 from server import EventServer as Server
-from util.decode_data import decode_data
 
 
 def run_server(port: int):
@@ -28,6 +27,8 @@ def run_server(port: int):
 
 
 def run_client(host: str, port: int):
+    from util.decode_data import decode_data
+
     client = Client(host, port)
 
     @client.on("connect")
@@ -41,6 +42,7 @@ def run_client(host: str, port: int):
     @client.on("echo")
     def echo(payload: str):
         print(payload)
+
     client.connect()
 
     while True:
