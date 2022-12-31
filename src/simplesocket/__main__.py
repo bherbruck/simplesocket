@@ -63,7 +63,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    if args.mode == "server":
-        run_server(args.port)
-    elif args.mode == "client":
-        run_client(args.host, args.port)
+    try:
+        if args.mode == "server":
+            run_server(args.port)
+        elif args.mode == "client":
+            run_client(args.host, args.port)
+    except KeyboardInterrupt:
+        print()
