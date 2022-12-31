@@ -4,6 +4,7 @@ import threading
 
 from event_handler import EventHandler
 from util.decode_data import decode_data
+from util.receive_data import receive_data
 
 
 logger = logging.getLogger(__name__)
@@ -33,12 +34,13 @@ class EventClient(EventHandler):
             handler()
         while True:
             try:
-                data = self.socket.recv(1024)
+                data = receive_data(self.socket)
                 if not data:
                     break
 
                 event, payload = decode_data(data)
                 self.event_handlers[event](payload)
+
             except ValueError:
                 continue
             except KeyError:

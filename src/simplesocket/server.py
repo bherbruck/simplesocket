@@ -3,6 +3,7 @@ from socket import socket as Socket
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 
 from event_handler import EventHandler
+from util.receive_data import receive_data
 from util.decode_data import decode_data
 
 
@@ -64,7 +65,7 @@ class EventServerHandler(BaseRequestHandler):
 
         while True:
             try:
-                data = socket.recv(1024)
+                data = receive_data(socket)
                 if not data:
                     break
 
