@@ -19,12 +19,11 @@ class ThreadedTCPServer(ThreadingMixIn, TCPServer):
 class EventServer(ThreadedTCPServer, EventHandler):
     """A server that can send and receive events"""
 
-    def __init__(self, *args, port=3000, **kwargs):
+    def __init__(self, host="", port=3000):
         # this is why I hate OOP/inheritance
-        ThreadedTCPServer.__init__(
-            self, ("", port), EventServerHandler, *args, **kwargs
-        )
+        ThreadedTCPServer.__init__(self, (host, port), EventServerHandler)
         EventHandler.__init__(self)
+        self.host = host
         self.port = port
         self.sockets: list[Socket] = []
         self.allow_reuse_address = True
