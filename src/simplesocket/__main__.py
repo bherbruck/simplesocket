@@ -1,3 +1,5 @@
+# pylint: disable=all
+
 from argparse import ArgumentParser
 from socket import socket as Socket
 from sys import argv

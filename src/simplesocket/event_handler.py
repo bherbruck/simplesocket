@@ -1,3 +1,6 @@
+# pylint: disable=missing-module-docstring
+
+
 class EventHandler:
     """
     Events functions should always return a string.
@@ -9,6 +12,7 @@ class EventHandler:
         self.disconnect_handlers: dict[str, callable] = []
         self.widcard_handler: callable = lambda *args, **kwargs: None
 
+    # pylint: disable=invalid-name, missing-function-docstring
     def on(self, event):
         def decorator(func):
             if event == "connect":

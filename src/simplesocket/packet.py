@@ -1,3 +1,5 @@
+"""Packet"""
+
 import struct
 from socket import socket as Socket
 
@@ -22,10 +24,6 @@ class Packet:
     def __init__(self, event: str, message: str):
         self.event = event
         self.message = message
-
-    def encode(self) -> bytes:
-        """Encode the packet into bytes."""
-        return Packet.encode(self.event, self.message)
 
     @staticmethod
     def encode(event: str, message: str) -> bytes:

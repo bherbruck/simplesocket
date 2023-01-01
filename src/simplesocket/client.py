@@ -1,19 +1,26 @@
+"""A client that can send and receive events"""
+
 import logging
 from socket import socket as Socket, AF_INET, SOCK_STREAM
 import threading
 
-from event_handler import EventHandler
-from packet import Packet
+from event_handler import EventHandler  # pylint: disable=import-error
+from packet import Packet  # pylint: disable=import-error
 
 
 logger = logging.getLogger(__name__)
 
 
 class EventClient(EventHandler):
+    """A client that can send and receive events"""
+
     def __init__(self, host: str, port: int):
         super().__init__()
         self.host = host
         self.port = port
+        self.socket = Socket(AF_INET, SOCK_STREAM)
+        self.receive_thread = threading.Thread(target=self._receive)
+        self.receive_thread.daemon = True
 
     def __enter__(self):
         self.connect()
@@ -23,16 +30,13 @@ class EventClient(EventHandler):
         self.close()
 
     def connect(self):
+        """Connect to the server and start the receive thread"""
         try:
-            self.socket = Socket(AF_INET, SOCK_STREAM)
             self.socket.connect((self.host, self.port))
-
-            self.receive_thread = threading.Thread(target=self._receive)
-            self.receive_thread.daemon = True
             self.receive_thread.start()
             return True
         except ConnectionRefusedError:
-            logger.error(f"Connection to {self.host}:{self.port} refused")
+            logger.error("Connection refused")
             return False
 
     def _receive(self):
@@ -56,14 +60,16 @@ class EventClient(EventHandler):
                 continue
             except BrokenPipeError:
                 break
-            except Exception as e:
-                logger.exception(e)
+            except Exception as exception:  # pylint: disable=broad-except
+                logger.exception(exception)
         for handler in self.disconnect_handlers:
             handler()
 
     def send(self, event: str, message: str):
+        """Send an event to the server"""
         packet = Packet.encode(event, message)
         self.socket.sendall(packet)
 
     def close(self):
+        """Close the connection to the server"""
         self.socket.close()
