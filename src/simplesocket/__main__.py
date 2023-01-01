@@ -9,10 +9,11 @@ from server import EventServer as Server
 
 
 def run_server(port: int):
+    print(f"starting server on port {port}...")
     from threading import Thread
     from time import sleep
 
-    with Server(port) as server:
+    with Server(port=port) as server:
 
         def ping():
             while True:
@@ -25,22 +26,29 @@ def run_server(port: int):
 
         @server.on("connect")
         def connect(socket: Socket):
-            print("connected")
+            address, port = socket.getpeername()
+            print(f"{address}:{port} connected")
 
         @server.on("disconnect")
         def disconnect(socket: Socket):
-            print("disconnected")
+            address, port = socket.getpeername()
+            print(f"{address}:{port} connected")
 
         @server.on("echo")
         def echo(socket: Socket, event: str, message: str):
-            print(message)
             server.send(socket, event, message)
+
+        @server.on("*")
+        def wildcard(socket: Socket, event: str, message: str):
+            address, port = socket.getpeername()
+            print(f"{address}:{port} {event} {message}")
 
         print(f"listening on port {port}")
         server.start()
 
 
 def run_client(host: str, port: int):
+    print(f"connecting to {host}:{port}...")
     with Client(host, port) as client:
 
         @client.on("connect")
@@ -77,8 +85,8 @@ if __name__ == "__main__":
         default="server",
     )
     if "client" in argv:
-        parser.add_argument("host", type=str, default="127.0.0.1")
-    parser.add_argument("port", type=int, default=3000)
+        parser.add_argument("host", type=str)
+    parser.add_argument("port", type=int)
 
     args = parser.parse_args()
 
