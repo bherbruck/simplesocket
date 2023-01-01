@@ -39,28 +39,28 @@ def run_server(port: int):
 
 
 def run_client(host: str, port: int):
-    client = Client(host, port)
+    with Client(host, port) as client:
 
-    @client.on("connect")
-    def connect():
-        print("connected")
+        @client.on("connect")
+        def connect():
+            print("connected")
 
-    @client.on("disconnect")
-    def disconnect():
-        print("disconnected")
+        @client.on("disconnect")
+        def disconnect():
+            print("disconnected")
 
-    @client.on("echo")
-    def echo(event: str, message: str):
-        print(message)
+        @client.on("echo")
+        def echo(event: str, message: str):
+            print(message)
 
     client.connect()
 
-    while True:
-        try:
-            event, message = input().split(" ", 1)
-            client.send(event, message)
-        except ValueError:
-            print("invalid input")
+        while True:
+            try:
+                event, message = input().split(" ", 1)
+                client.send(event, message)
+            except ValueError:
+                print("invalid input")
 
 
 if __name__ == "__main__":
