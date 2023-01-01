@@ -1,10 +1,9 @@
 import logging
-import socket
+from socket import socket as Socket, AF_INET, SOCK_STREAM
 import threading
 
 from event_handler import EventHandler
-from util.decode_data import decode_data
-from util.receive_data import receive_data
+from packet import Packet
 
 
 logger = logging.getLogger(__name__)
@@ -16,9 +15,16 @@ class EventClient(EventHandler):
         self.host = host
         self.port = port
 
+    def __enter__(self):
+        self.connect()
+        return self
+
+    def __exit__(self, _, __, ___):
+        self.close()
+
     def connect(self):
         try:
-            self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.socket = Socket(AF_INET, SOCK_STREAM)
             self.socket.connect((self.host, self.port))
 
             self.receive_thread = threading.Thread(target=self._receive)
@@ -34,12 +40,15 @@ class EventClient(EventHandler):
             handler()
         while True:
             try:
-                data = receive_data(self.socket)
-                if not data:
+                packet = Packet.receive(self.socket)
+                if packet is None:
                     break
 
-                event, payload = decode_data(data)
-                self.event_handlers[event](payload)
+                event = packet.event
+                message = packet.message
+
+                self.widcard_handler(event, message)
+                self.event_handlers[event](event, message)
 
             except ValueError:
                 continue
@@ -52,8 +61,9 @@ class EventClient(EventHandler):
         for handler in self.disconnect_handlers:
             handler()
 
-    def send(self, event: str, payload: str):
-        self.socket.sendall(f"{event} {payload}".encode("utf-8").strip() + b"\n")
+    def send(self, event: str, message: str):
+        packet = Packet.encode(event, message)
+        self.socket.sendall(packet)
 
     def close(self):
         self.socket.close()

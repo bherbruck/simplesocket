@@ -1,4 +1,4 @@
-import argparse
+from argparse import ArgumentParser
 from socket import socket as Socket
 from sys import argv
 
@@ -7,7 +7,19 @@ from server import EventServer as Server
 
 
 def run_server(port: int):
+    from threading import Thread
+    from time import sleep
+
     with Server(port) as server:
+
+        def ping():
+            while True:
+                server.broadcast("ping", "ping")
+                sleep(1)
+
+        thread = Thread(target=ping)
+        thread.daemon = True
+        thread.start()
 
         @server.on("connect")
         def connect(socket: Socket):
@@ -18,17 +30,15 @@ def run_server(port: int):
             print("disconnected")
 
         @server.on("echo")
-        def echo(socket: Socket, payload: str):
-            print(payload)
-            return payload
+        def echo(socket: Socket, event: str, message: str):
+            print(message)
+            server.send(socket, event, message)
 
         print(f"listening on port {port}")
         server.start()
 
 
 def run_client(host: str, port: int):
-    from util.decode_data import decode_data
-
     client = Client(host, port)
 
     @client.on("connect")
@@ -40,21 +50,21 @@ def run_client(host: str, port: int):
         print("disconnected")
 
     @client.on("echo")
-    def echo(payload: str):
-        print(payload)
+    def echo(event: str, message: str):
+        print(message)
 
     client.connect()
 
     while True:
         try:
-            event, payload = decode_data(input().encode("utf-8"))
-            client.send(event, payload)
+            event, message = input().split(" ", 1)
+            client.send(event, message)
         except ValueError:
             print("invalid input")
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
+    parser = ArgumentParser()
     parser.add_argument(
         "mode",
         type=str,

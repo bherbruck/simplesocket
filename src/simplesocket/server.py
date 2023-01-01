@@ -3,8 +3,7 @@ from socket import socket as Socket
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 
 from event_handler import EventHandler
-from util.receive_data import receive_data
-from util.decode_data import decode_data
+from packet import Packet
 
 
 logger = logging.getLogger(__name__)
@@ -26,13 +25,13 @@ class EventServer(ThreadedTCPServer, EventHandler):
         self.allow_reuse_address = True
         self.allow_reuse_port = True
 
-    def send(self, socket: Socket, event: str, payload: str):
-        socket.sendall(f"{event} {payload}".encode("utf-8").strip() + b"\n")
+    def send(self, socket: Socket, event: str, message: str):
+        packet = Packet.encode(event, message)
+        socket.sendall(packet)
 
-    def broadcast(self, event: str, payload: str):
-
+    def broadcast(self, event: str, message: str):
         for socket in self.sockets:
-            self.send(socket, event, payload)
+            self.send(socket, event, message)
 
     def close(self):
         self.shutdown()
@@ -51,9 +50,6 @@ class EventServerHandler(BaseRequestHandler):
     def handle_invalid_event(self, socket: Socket):
         self.server.send(socket, "error", "Invalid event")
 
-    def handle_payload():
-        pass
-
     def handle(self):
         server: EventServer = self.server
         socket: Socket = self.request
@@ -65,12 +61,15 @@ class EventServerHandler(BaseRequestHandler):
 
         while True:
             try:
-                data = receive_data(socket)
-                if not data:
+                packet = Packet.receive(socket)
+                if packet is None:
                     break
 
-                event, payload = decode_data(data)
-                response = server.event_handlers[event](socket, payload)
+                event = packet.event
+                message = packet.message
+
+                server.widcard_handler(socket, event, message)
+                response = server.event_handlers[event](socket, event, message)
                 if response is not None:
                     server.send(socket, event, response)
 
