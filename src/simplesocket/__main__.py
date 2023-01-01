@@ -14,7 +14,7 @@ def run_server(port: int):
 
         def ping():
             while True:
-                server.broadcast("ping", "ping")
+                server.broadcast("ping", "")
                 sleep(1)
 
         thread = Thread(target=ping)
@@ -53,7 +53,9 @@ def run_client(host: str, port: int):
         def echo(event: str, message: str):
             print(message)
 
-    client.connect()
+        @client.on("ping")
+        def ping(event: str, message: str):
+            client.send("pong", "")
 
         while True:
             try:
