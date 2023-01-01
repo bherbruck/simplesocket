@@ -3,6 +3,7 @@
 import logging
 from socket import socket as Socket, AF_INET, SOCK_STREAM
 import threading
+from time import sleep
 
 from event_handler import EventHandler  # pylint: disable=import-error
 from packet import Packet  # pylint: disable=import-error
@@ -14,13 +15,14 @@ logger = logging.getLogger(__name__)
 class EventClient(EventHandler):
     """A client that can send and receive events"""
 
-    def __init__(self, host: str, port: int):
+    def __init__(self, host: str, port: int, should_reconnect: bool = True):
         super().__init__()
         self.host = host
         self.port = port
         self.socket = Socket(AF_INET, SOCK_STREAM)
         self.receive_thread = threading.Thread(target=self._receive)
         self.receive_thread.daemon = True
+        self.should_reconnect = should_reconnect
 
     def __enter__(self):
         self.connect()
@@ -35,8 +37,12 @@ class EventClient(EventHandler):
             self.socket.connect((self.host, self.port))
             self.receive_thread.start()
             return True
-        except ConnectionRefusedError:
+        except:  # pylint: disable=bare-except
             logger.error("Connection refused")
+            if self.should_reconnect:
+                sleep(1)
+                logger.info("Reconnecting...")
+                return self.connect()
             return False
 
     def _receive(self):
@@ -64,6 +70,9 @@ class EventClient(EventHandler):
                 logger.exception(exception)
         for handler in self.disconnect_handlers:
             handler()
+        if self.should_reconnect:
+            self.close()
+            self.connect()
 
     def send(self, event: str, message: str):
         """Send an event to the server"""
