@@ -16,5 +16,6 @@
     "**/.mypy_cache": true,
     "**/.cache": true,
     "**/.coverage": true
-  }
+  },
+  "remote.localPortHost": "allInterfaces"
 }
