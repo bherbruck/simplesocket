@@ -23,7 +23,6 @@ class Packet:
         self.event = event
         self.message = message
 
-    @classmethod
     def encode(self) -> bytes:
         """Encode the packet into bytes."""
         return Packet.encode(self.event, self.message)
