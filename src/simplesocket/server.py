@@ -20,14 +20,13 @@ class EventServer(ThreadedTCPServer, EventHandler):
     """A server that can send and receive events"""
 
     def __init__(self, host="", port=3000):
+        self.allow_reuse_address = True
         # this is why I hate OOP/inheritance
         ThreadedTCPServer.__init__(self, (host, port), EventServerHandler)
         EventHandler.__init__(self)
         self.host = host
         self.port = port
         self.sockets: list[Socket] = []
-        self.allow_reuse_address = True
-        self.allow_reuse_port = True
 
     def send(self, socket: Socket, event: str, message: str):
         """Send an event to a socket"""
@@ -47,8 +46,6 @@ class EventServer(ThreadedTCPServer, EventHandler):
     def start(self):
         """Start the server"""
         self.serve_forever()
-        self.allow_reuse_address = True
-        self.allow_reuse_port = True
 
 
 class EventServerHandler(BaseRequestHandler):
