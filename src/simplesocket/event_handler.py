@@ -13,7 +13,7 @@ class EventHandler:
         self.widcard_handler: callable = lambda *args, **kwargs: None
 
     # pylint: disable=invalid-name, missing-function-docstring
-    def on(self, event):
+    def on(self, event: str):
         def decorator(func):
             if event == "connect":
                 self.connect_handlers.append(func)
