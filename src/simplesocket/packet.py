@@ -14,22 +14,25 @@ class Packet:
     ```txt
     +---------------+---------------+----------+----------+
     | Packet Length | Event Length  | Event    | Message  |
-    | (2 bytes)     | (2 bytes)     | (utf-8)  | (utf-8)  |
+    | (2 bytes)     | (2 bytes)     | (utf-8)  | (bytes)  |
     +---------------+---------------+----------+----------+
     ```
     """
 
     HEADER_LENGTH = 4
 
-    def __init__(self, event: str, message: str):
+    def __init__(self, event: str, message: bytes):
         self.event = event
         self.message = message
 
     @staticmethod
-    def encode(event: str, message: str) -> bytes:
+    def encode(event: str, message: bytes) -> bytes:
         """Encode a event and message into a packet."""
         event_bytes = event.encode("utf-8")
-        message_bytes = message.encode("utf-8")
+        try:
+            message_bytes = message.encode("utf-8") # if message is a string
+        except AttributeError:
+            message_bytes = message
         packet_length = len(event_bytes) + len(message_bytes) + Packet.HEADER_LENGTH
         event_length = len(event_bytes)
         return (
@@ -47,7 +50,7 @@ class Packet:
         ].decode("utf-8")
         data: bytes = packet[
             Packet.HEADER_LENGTH + event_length : packet_length + Packet.HEADER_LENGTH
-        ].decode("utf-8")
+        ]
         return Packet(event, data)
 
     @staticmethod
