@@ -26,7 +26,7 @@ class EventServer(ThreadedTCPServer, EventHandler):
         EventHandler.__init__(self)
         self.host = host
         self.port = port
-        self.sockets: list[Socket] = []
+        self.sockets: dict[str, Socket] = {}
 
     def send(self, socket: Socket, event: str, message: str):
         """Send an event to a socket"""
@@ -34,7 +34,7 @@ class EventServer(ThreadedTCPServer, EventHandler):
 
     def broadcast(self, event: str, message: str):
         """Send an event to all sockets"""
-        for socket in self.sockets:
+        for socket in self.sockets.values():
             self.send(socket, event, message)
 
     def close(self):
@@ -63,10 +63,13 @@ class EventServerHandler(BaseRequestHandler):
         server: EventServer = self.server
         socket: Socket = self.request
 
-        server.sockets.append(socket)
+        address, port = socket.getpeername()
+        socket_name = f"{address}:{port}"
+
+        server.sockets[socket_name] = socket
 
         for handler in server.connect_handlers:
-            handler(socket)
+            handler(socket_name, socket)
 
         while True:
             try:
@@ -77,8 +80,10 @@ class EventServerHandler(BaseRequestHandler):
                 event = packet.event
                 message = packet.message
 
-                server.widcard_handler(socket, event, message)
-                response = server.event_handlers[event](socket, event, message)
+                server.widcard_handler(event, message, socket_name, socket)
+                response = server.event_handlers[event](
+                    event, message, socket_name, socket
+                )
                 if response is not None:
                     server.send(socket, event, response)
 
@@ -91,7 +96,7 @@ class EventServerHandler(BaseRequestHandler):
             except Exception as exception:  # pylint: disable=broad-except
                 logger.exception(exception)
 
-        server.sockets.remove(socket)
-
         for handler in server.disconnect_handlers:
-            handler(socket)
+            handler(socket_name, socket)
+
+        server.sockets.pop(socket_name)
