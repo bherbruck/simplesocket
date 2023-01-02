@@ -4,8 +4,8 @@ import logging
 from socket import socket as Socket
 from socketserver import BaseRequestHandler, TCPServer, ThreadingMixIn
 
-from event_handler import EventHandler  # pylint: disable=import-error
-from packet import Packet  # pylint: disable=import-error
+from simplesocket.event_handler import EventHandler  # pylint: disable=import-error
+from simplesocket.packet import Packet  # pylint: disable=import-error
 
 
 logger = logging.getLogger(__name__)

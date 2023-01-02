@@ -4,4 +4,6 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["python", "-u", "src/simplesocket", "server", "3000"]
+RUN pip install .
+
+CMD ["python", "-m", "simplesocket", "server", "3000"]

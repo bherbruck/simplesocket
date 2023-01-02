@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - 3000:3000
-    command: python -u src/simplesocket server 3000
+    command: python -m simplesocket server 3000
     networks:
       - app
 
@@ -15,7 +15,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    command: python -u src/simplesocket client server 3000
+    command: python -m simplesocket client server 3000
     networks:
       - app
     depends_on:

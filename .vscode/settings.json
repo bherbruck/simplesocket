@@ -15,7 +15,10 @@
     "**/.pytest_cache": true,
     "**/.mypy_cache": true,
     "**/.cache": true,
-    "**/.coverage": true
+    "**/.coverage": true,
+    "**/*.egg-info": true,
+    "**/dist": true,
+    "**/build": true
   },
   "remote.localPortHost": "allInterfaces"
 }

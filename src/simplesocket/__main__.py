@@ -5,8 +5,8 @@ from socket import socket as Socket
 from sys import argv
 from time import sleep, time
 
-from client import EventClient as Client
-from server import EventServer as Server
+from simplesocket.client import EventClient as Client
+from simplesocket.server import EventServer as Server
 
 
 def run_server(port: int):
