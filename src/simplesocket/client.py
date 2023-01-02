@@ -76,8 +76,7 @@ class EventClient(EventHandler):
 
     def send(self, event: str, message: str):
         """Send an event to the server"""
-        packet = Packet.encode(event, message)
-        self.socket.sendall(packet)
+        return Packet.send(self.socket, event, message)
 
     def close(self):
         """Close the connection to the server"""

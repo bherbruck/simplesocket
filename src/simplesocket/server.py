@@ -30,8 +30,7 @@ class EventServer(ThreadedTCPServer, EventHandler):
 
     def send(self, socket: Socket, event: str, message: str):
         """Send an event to a socket"""
-        packet = Packet.encode(event, message)
-        socket.sendall(packet)
+        return Packet.send(socket, event, message)
 
     def broadcast(self, event: str, message: str):
         """Send an event to all sockets"""
