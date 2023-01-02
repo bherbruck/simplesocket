@@ -1,7 +1,7 @@
 # pylint: disable=missing-module-docstring
 
 
-class EventHandler:
+class EventHandler:  # pylint: disable=too-few-public-methods
     """
     Events functions should always return a string.
     """
