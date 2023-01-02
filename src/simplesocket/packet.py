@@ -69,9 +69,11 @@ class Packet:
             return None
 
     @staticmethod
-    def send(socket: Socket, event: str, message: bytes) -> "Packet":
+    def send(socket: Socket, event: str, message: bytes):
         """Send a packet to a socket."""
         try:
-            return socket.sendall(Packet.encode(event, message))
-        except (ConnectionError, OSError, ValueError):
-            return None
+            socket.sendall(Packet.encode(event, message))
+            return True
+        except (ConnectionError, OSError, ValueError) as exception:
+            print(exception)
+            return False
