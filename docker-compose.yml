@@ -1,0 +1,28 @@
+version: "3.7"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    command: python -u src/simplesocket server 3000
+    networks:
+      - app
+
+  client:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: python -u src/simplesocket client server 3000
+    networks:
+      - app
+    depends_on:
+      - server
+    deploy:
+      # for testing purposes
+      replicas: 10
+
+networks:
+  app:

@@ -2,6 +2,9 @@
 	"name": "Python 3",
 	"image": "mcr.microsoft.com/devcontainers/python:0-3.11",
 	"onCreateCommand": "sudo apt update && sudo apt install -y netcat",
+	"features": {
+		"ghcr.io/devcontainers/features/docker-in-docker": {}
+	},
 	"customizations": {
 		"vscode": {
 			"extensions": [

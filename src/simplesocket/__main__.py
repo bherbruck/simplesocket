@@ -3,6 +3,7 @@
 from argparse import ArgumentParser
 from socket import socket as Socket
 from sys import argv
+from time import sleep, time
 
 from client import EventClient as Client
 from server import EventServer as Server
@@ -68,11 +69,14 @@ def run_client(host: str, port: int):
             client.send("pong", "")
 
         while True:
-            try:
-                event, message = input().split(" ", 1)
-                client.send(event, message)
-            except ValueError:
-                print("invalid input")
+            current_time = int(time() * 1000)
+            client.send("echo", str(current_time))
+            sleep(0.01)
+            # try:
+            #     event, message = input().split(" ", 1)
+            #     client.send(event, message)
+            # except ValueError:
+            #     print("invalid input")
 
 
 if __name__ == "__main__":
