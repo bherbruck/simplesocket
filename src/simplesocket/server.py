@@ -81,11 +81,7 @@ class EventServerHandler(BaseRequestHandler):
                 message = packet.message
 
                 server.widcard_handler(event, message, socket_name, socket)
-                response = server.event_handlers[event](
-                    event, message, socket_name, socket
-                )
-                if response is not None:
-                    server.send(socket, event, response)
+                server.event_handlers[event](event, message, socket_name, socket)
 
             except ValueError:
                 self.handle_missing_event(socket)
