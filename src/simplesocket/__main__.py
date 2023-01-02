@@ -26,23 +26,20 @@ def run_server(port: int):
         thread.start()
 
         @server.on("connect")
-        def connect(socket: Socket):
-            address, port = socket.getpeername()
-            print(f"{address}:{port} connected")
+        def connect(address: str, socket: Socket):
+            print(f"{address} connected")
 
         @server.on("disconnect")
-        def disconnect(socket: Socket):
-            address, port = socket.getpeername()
-            print(f"{address}:{port} disconnected")
+        def disconnect(address: str, socket: Socket):
+            print(f"{address} disconnected")
 
         @server.on("echo")
-        def echo(socket: Socket, event: str, message: str):
+        def echo(event: str, message: str, address: str, socket: Socket):
             server.send(socket, event, message)
 
         @server.on("*")
-        def wildcard(socket: Socket, event: str, message: str):
-            address, port = socket.getpeername()
-            print(f"{address}:{port} {event} {message}")
+        def wildcard(event: str, message: str, address: str, socket: Socket):
+            print(f"{address} {event} {message}")
 
         print(f"listening on port {port}")
         server.start()
@@ -70,7 +67,9 @@ def run_client(host: str, port: int):
 
         while True:
             current_time = int(time() * 1000)
-            client.send("echo", str(current_time))
+            packet = client.send("echo", str(current_time))
+            if not packet:
+                print(f"Tried to send {current_time} to echo but got {packet}")
             sleep(0.01)
             # try:
             #     event, message = input().split(" ", 1)
@@ -87,10 +86,11 @@ if __name__ == "__main__":
         help="client or server",
         choices=("client", "server"),
         default="server",
+        nargs="?",
     )
     if "client" in argv:
-        parser.add_argument("host", type=str)
-    parser.add_argument("port", type=int)
+        parser.add_argument("host", type=str, default="localhost", nargs="?")
+    parser.add_argument("port", type=int, default=3000, nargs="?")
 
     args = parser.parse_args()
 
