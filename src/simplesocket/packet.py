@@ -74,6 +74,5 @@ class Packet:
         try:
             socket.sendall(Packet.encode(event, message))
             return True
-        except (ConnectionError, OSError, ValueError) as exception:
-            print(exception)
+        except (ConnectionError, OSError, ValueError):
             return False
