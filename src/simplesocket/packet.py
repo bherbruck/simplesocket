@@ -30,7 +30,7 @@ class Packet:
         """Encode a event and message into a packet."""
         event_bytes = event.encode("utf-8")
         try:
-            message_bytes = message.encode("utf-8") # if message is a string
+            message_bytes = message.encode("utf-8")  # if message is a string
         except AttributeError:
             message_bytes = message
         packet_length = len(event_bytes) + len(message_bytes) + Packet.HEADER_LENGTH
@@ -56,11 +56,22 @@ class Packet:
     @staticmethod
     def receive(socket: Socket) -> "Packet":
         """Receive a packet from a socket."""
-        header = socket.recv(4)
-        if not header or len(header) != Packet.HEADER_LENGTH:
+        try:
+            header = socket.recv(4)
+            if not header or len(header) != Packet.HEADER_LENGTH:
+                return None
+
+            packet_length, event_length = struct.unpack("!HH", header)
+            event = socket.recv(event_length)
+            data = socket.recv(packet_length - event_length - Packet.HEADER_LENGTH)
+            return Packet.decode(header + event + data)
+        except (ConnectionError, OSError, ValueError):
             return None
 
-        packet_length, event_length = struct.unpack("!HH", header)
-        event = socket.recv(event_length)
-        data = socket.recv(packet_length - event_length - Packet.HEADER_LENGTH)
-        return Packet.decode(header + event + data)
+    @staticmethod
+    def send(socket: Socket, event: str, message: bytes) -> "Packet":
+        """Send a packet to a socket."""
+        try:
+            return socket.sendall(Packet.encode(event, message))
+        except (ConnectionError, OSError, ValueError):
+            return None
